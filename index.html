@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Tunamaya FAQ – Accordion Designs</title>
+	<meta name="theme-color" content="#0f524c">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<style>
+		/* Tokens taken from the live homepage (New folder/page.html). */
+		:root {
+			--tm-green: #0f524c;
+			--tm-green-deep: #0b423d;
+			--tm-mint: #e6f5f3;
+			--tm-ink: #292929;
+			--tm-muted: #575757;
+			--tm-line: #d2d4d4;
+			--tm-accent: #3bdfa4;
+			--tm-font: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+			--tm-ease: cubic-bezier(.4, 0, .2, 1);
+			/* FAQ-specific colours from .tm-home-faq */
+			--faq-card: #e5f5f3;
+			--faq-sign: #c4eae8;
+			--faq-pill: #f3f9f8;
+			--faq-pill-ink: #80a5a3;
+			--faq-pill-on: #10534e;
+		}
+
+		*, *::before, *::after { box-sizing: border-box; }
+		html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+		body {
+			margin: 0;
+			font-family: var(--tm-font);
+			font-size: 16px;
+			line-height: 1.65;
+			color: var(--tm-ink);
+			background: #fff;
+			-webkit-font-smoothing: antialiased;
+		}
+		h1, h2, h3, h4 { margin: 0; font-weight: 600; line-height: 1.18; letter-spacing: -0.01em; color: var(--tm-ink); }
+		p { margin: 0; }
+		a { color: inherit; text-decoration: none; }
+		button { font: inherit; }
+		:focus-visible { outline: 2px solid var(--tm-accent); outline-offset: 3px; }
+		svg { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: 0 0 auto; }
+
+		.container { --gutter: 48px; max-width: 1440px; margin-inline: auto; padding-inline: var(--gutter); }
+
+		/* ---------- Explorer chrome (not part of the designs) ---------- */
+		.xbar { position: sticky; top: 0; z-index: 10; background: #fff; border-bottom: 1px solid var(--tm-line); }
+		.xbar__in { display: flex; align-items: center; gap: 24px; min-height: 64px; }
+		.xbar__brand { font-weight: 700; color: var(--tm-green); white-space: nowrap; }
+		.xbar__brand small { font-weight: 500; color: var(--tm-muted); margin-left: 6px; }
+		.xbar__nav { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin-left: auto; }
+		.xbar__nav a { white-space: nowrap; font-size: 13px; font-weight: 600; color: var(--tm-muted); padding: 6px 14px; border-radius: 999px; }
+		.xbar__nav a:hover { background: var(--tm-mint); color: var(--tm-green); }
+
+		/* Each design sits in its own frame: dark top band, white design, dark bottom band, grey gap. */
+		.demos { display: grid; grid-template-columns: minmax(0, 1fr); gap: 48px; padding: 48px 24px 64px; background: #eceeee; }
+		.demo { max-width: 1600px; width: 100%; margin-inline: auto; background: #fff; border-radius: 20px; overflow: clip; box-shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 12px 32px -16px rgba(0, 0, 0, .18); }
+		.demo__top, .demo__bottom { background: var(--tm-ink); color: #fff; }
+		.demo__top { padding-block: 28px; }
+		.demo__bottom { padding-block: 18px; }
+		.demo__bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 32px; }
+		.demo__meta { display: grid; gap: 6px; max-width: 820px; }
+		.demo__num { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--tm-accent); }
+		.demo__num small { font-size: inherit; color: rgba(255, 255, 255, .5); }
+		.demo__name { font-size: 24px; color: #fff; }
+		.demo__specs { display: grid; gap: 8px; margin: 6px 0 0; }
+		.demo__specs > div { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 4px 16px; }
+		.demo__specs dt { padding-top: 2px; font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--tm-accent); }
+		.demo__specs dd { margin: 0; font-size: 14px; line-height: 1.55; color: rgba(255, 255, 255, .78); }
+		.demo__tag { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: rgba(255, 255, 255, .55); }
+		.demo__top .demo__tag { align-self: flex-start; padding: 6px 12px; border: 1px solid rgba(255, 255, 255, .25); border-radius: 999px; }
+		.demo__links { display: flex; flex-wrap: wrap; gap: 8px; }
+		.demo__links a { font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .25); color: #fff; transition: background .2s var(--tm-ease), color .2s var(--tm-ease); }
+		.demo__links a:hover { background: #fff; color: var(--tm-ink); }
+		.demo :focus-visible { outline-color: var(--tm-accent); }
+
+		/* ---------- Shared homepage primitives ---------- */
+		.tm-section { padding-block: 72px 96px; background: #fff; }
+		.tm-eyebrow { letter-spacing: .14em; text-transform: uppercase; color: var(--tm-ink); margin-bottom: 18px; font-size: 12px; font-weight: 700; }
+		.tm-display { font-size: clamp(28px, 2.9vw, 40px); max-width: 15em; }
+		.is-centred { text-align: center; }
+		.is-centred .tm-display { margin-inline: auto; }
+
+		.btn {
+			display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+			min-height: 40px; padding: 10px 22px;
+			font-size: 12.5px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; line-height: 1.2;
+			border: 1px solid transparent; border-radius: 999px; cursor: pointer; white-space: nowrap;
+			transition: background .2s var(--tm-ease), color .2s var(--tm-ease), border-color .2s var(--tm-ease);
+		}
+		.btn svg { font-size: 16px; }
+		.btn-tm { background: var(--tm-green); border-color: var(--tm-green); color: #fff; }
+		.btn-tm:hover { background: var(--tm-green-deep); border-color: var(--tm-green-deep); }
+		.btn-tm-light { background: #fff; border-color: #fff; color: var(--tm-green); }
+		.btn-tm-light:hover { background: var(--tm-mint); border-color: var(--tm-mint); }
+		.btn-tm-outline { background: transparent; border-color: var(--tm-ink); color: var(--tm-ink); }
+		.btn-tm-outline:hover { background: var(--tm-ink); color: #fff; }
+
+		/* Accordion mechanics, as on the live page (grid-rows transition). */
+		.acc__q {
+			width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 20px;
+			background: none; border: 0; text-align: left; cursor: pointer; color: var(--tm-ink);
+			font-weight: 600; line-height: 1.4;
+		}
+		.acc__a { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .3s var(--tm-ease); }
+		.acc__a > div { overflow: hidden; }
+		.acc.is-open > .acc__a { grid-template-rows: 1fr; }
+		.acc__body { color: var(--tm-muted); font-size: 16px; line-height: 1.5; }
+		.acc__body p + p, .acc__body p + address { margin-top: 12px; }
+		.acc__sign { display: grid; place-items: center; flex: 0 0 auto; color: var(--tm-green); border-radius: 999px; transition: background .2s var(--tm-ease), color .2s var(--tm-ease), transform .3s var(--tm-ease); }
+		.acc__sign .v { transform-box: fill-box; transform-origin: center; transition: transform .3s var(--tm-ease); }
+		.acc.is-open > .acc__q .acc__sign .v { transform: scaleY(0); }
+
+		.faq-contact { display: grid; gap: 2px; font-style: normal; }
+		.faq-contact strong { color: var(--tm-ink); font-weight: 600; }
+		.faq-contact a { color: var(--tm-green); font-weight: 600; }
+		.faq-contact a:hover { text-decoration: underline; }
+
+		/* Inline enquire row inside an answer */
+		.enq-inline { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 20px; }
+		.enq-inline__note { font-size: 14px; color: var(--tm-muted); }
+		.enq-inline__note a { color: var(--tm-green); font-weight: 600; }
+
+		/* =========================================================
+		   01 · Centred Column — enquire button inside every answer
+		   ========================================================= */
+		.d1__tabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 40px auto 48px; max-width: 1100px; }
+		.d1__tabs button {
+			color: var(--faq-pill-ink); background: var(--faq-pill); border: 0; border-radius: 40px;
+			padding: 12px 22px; font-size: 17px; font-weight: 600; line-height: 1.3; cursor: pointer;
+			transition: background .2s var(--tm-ease), color .2s var(--tm-ease);
+		}
+		.d1__tabs button:hover { color: var(--faq-pill-on); }
+		.d1__tabs button[aria-selected="true"] { color: #fff; background: var(--faq-pill-on); }
+		.d1__list { display: grid; gap: 16px; max-width: 960px; margin-inline: auto; }
+		.d1 .acc { border: 1px solid var(--tm-line); border-radius: 16px; overflow: hidden; transition: background .25s var(--tm-ease), border-color .25s var(--tm-ease); }
+		.d1 .acc:hover { border-color: var(--faq-sign); }
+		.d1 .acc.is-open { background: var(--faq-card); border-color: var(--faq-card); }
+		.d1 .acc__q { min-height: 88px; padding: 22px 24px; font-size: 24px; }
+		.d1 .acc__sign { width: 48px; height: 48px; background: var(--faq-card); font-size: 18px; }
+		.d1 .acc.is-open .acc__sign { background: var(--tm-green); color: #fff; }
+		.d1 .acc__body { padding: 0 24px 24px; }
+		.d1__help { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px 24px; margin-top: 40px; text-align: center; }
+		.d1__help p { font-size: 16px; color: var(--tm-muted); }
+		.d1__help strong { color: var(--tm-ink); font-weight: 600; }
+
+		/* =========================================================
+		   02 · Stacked Topics — each topic is its own accordion
+		   ========================================================= */
+		.d2__list { display: grid; gap: 16px; max-width: 1100px; margin: 48px auto 0; }
+		:is(.d2, .d5) .cacc { border: 1px solid var(--tm-line); border-radius: 16px; overflow: hidden; transition: border-color .25s var(--tm-ease); }
+		:is(.d2, .d5) .cacc.is-open { border-color: var(--tm-green); }
+		:is(.d2, .d5) .cacc__head { display: flex; align-items: center; gap: 16px; padding-right: 24px; transition: background .25s var(--tm-ease); }
+		:is(.d2, .d5) .cacc.is-open .cacc__head { background: var(--tm-mint); }
+		:is(.d2, .d5) .cacc__toggle { flex: 1; display: flex; align-items: center; gap: 20px; min-height: 96px; padding: 24px; background: none; border: 0; text-align: left; cursor: pointer; color: var(--tm-ink); }
+		:is(.d2, .d5) .cacc__icon { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 12px; background: var(--tm-mint); color: var(--tm-green); font-size: 22px; transition: background .25s var(--tm-ease), color .25s var(--tm-ease); }
+		:is(.d2, .d5) .cacc.is-open .cacc__icon { background: var(--tm-green); color: #fff; }
+		:is(.d2, .d5) .cacc__label { flex: 1; font-size: 20px; font-weight: 600; line-height: 1.3; }
+		:is(.d2, .d5) .cacc__label small { display: block; margin-top: 2px; font-size: 14px; font-weight: 500; color: var(--tm-muted); }
+		:is(.d2, .d5) .cacc__chev { font-size: 20px; color: var(--tm-green); transition: transform .3s var(--tm-ease); }
+		:is(.d2, .d5) .cacc.is-open .cacc__chev { transform: rotate(180deg); }
+		:is(.d2, .d5) .cacc > .acc__a { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .35s var(--tm-ease); }
+		:is(.d2, .d5) .cacc.is-open > .acc__a { grid-template-rows: 1fr; }
+		:is(.d2, .d5) .cacc__body { padding: 8px 24px 16px 92px; }
+		:is(.d2, .d5) .acc { border-bottom: 1px solid var(--tm-line); }
+		:is(.d2, .d5) .acc:last-child { border-bottom: 0; }
+		:is(.d2, .d5) .acc__q { padding: 20px 0; font-size: 18px; }
+		:is(.d2, .d5) .acc.is-open .acc__q { color: var(--tm-green); }
+		:is(.d2, .d5) .acc__sign { width: 36px; height: 36px; background: var(--faq-card); font-size: 16px; }
+		:is(.d2, .d5) .acc__body { padding-bottom: 20px; max-width: 820px; }
+		.d2__help { text-align: center; margin-top: 40px; color: var(--tm-muted); }
+		.d2__help a { color: var(--tm-green); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+
+		/* =========================================================
+		   03 · Mint Panel — sticky topic panel that swaps its CTA
+		   ========================================================= */
+		.d3__grid { display: grid; grid-template-columns: 400px minmax(0, 1fr); gap: 48px; align-items: start; margin-top: 48px; }
+		.d3__panel { position: sticky; top: 88px; background: var(--tm-mint); border-radius: 16px; padding: 24px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
+		.d3__tabs { display: grid; gap: 4px; }
+		.d3__tabs button {
+			display: flex; align-items: center; gap: 14px; width: 100%; padding: 12px 16px; border: 0; border-radius: 12px;
+			background: transparent; color: var(--tm-ink); text-align: left; cursor: pointer;
+			font-size: 16px; font-weight: 600; line-height: 1.35; transition: background .2s var(--tm-ease), color .2s var(--tm-ease);
+		}
+		.d3__tabs button svg { font-size: 20px; color: var(--tm-green); }
+		.d3__tabs button:hover { background: rgba(255, 255, 255, .6); }
+		.d3__tabs button[aria-selected="true"] { background: #fff; color: var(--tm-green); }
+		.d3__cta { background: var(--tm-green); color: #fff; border-radius: 16px; padding: 24px; }
+		.d3__cta h3 { color: #fff; font-size: 24px; margin-bottom: 8px; }
+		.d3__cta p { font-size: 16px; line-height: 1.5; margin-bottom: 24px; color: rgba(255, 255, 255, .85); }
+		.d3__list { display: grid; gap: 8px; }
+		.d3 .acc { transition: background .25s var(--tm-ease), border-radius .25s var(--tm-ease); }
+		.d3 .acc.is-open { border-radius: 16px; }
+		.d3 .acc.is-open { background: var(--faq-card); }
+		.d3 .acc__q { padding: 24px; font-size: 24px; align-items: flex-start; }
+		.d3 .acc__num { flex: 0 0 auto; min-width: 32px; padding-top: 6px; font-size: 14px; font-weight: 700; letter-spacing: .06em; color: var(--tm-green); }
+		.d3 .acc__qt { flex: 1; }
+		.d3 .acc__sign { width: 40px; height: 40px; border: 1px solid var(--tm-line); font-size: 16px; }
+		.d3 .acc.is-open .acc__sign { background: var(--tm-green); border-color: var(--tm-green); color: #fff; }
+		.d3 .acc__body { padding: 0 24px 24px 76px; }
+		.d3 .acc + .acc { border-top: 1px solid var(--tm-line); }
+		.d3 .acc.is-open, .d3 .acc.is-open + .acc { border-top-color: transparent; }
+
+		/* =========================================================
+		   04 · Side Tabs — Design 02 from test folder/index.html, re-set on white
+		   ========================================================= */
+		.d4__grid { display: grid; grid-template-columns: 400px minmax(0, 1fr); gap: 56px; align-items: start; margin-top: 48px; }
+		.d4__nav { position: sticky; top: 96px; display: grid; gap: 32px; }
+		.d4__tabs { display: grid; gap: 6px; }
+		.d4__tabs button {
+			display: flex; align-items: center; gap: 14px; width: 100%; min-height: 60px; padding: 14px 16px;
+			border: 0; border-radius: 14px; background: transparent; color: var(--tm-ink); text-align: left; cursor: pointer;
+			font-size: 16px; font-weight: 600; line-height: 1.3; transition: background .2s var(--tm-ease), color .2s var(--tm-ease);
+		}
+		.d4__tabs button:hover { background: var(--tm-mint); }
+		.d4__tabs button[aria-selected="true"] { background: var(--tm-green); color: #fff; }
+		.d4__tnum { flex: 0 0 22px; font-size: 12px; font-weight: 700; color: var(--tm-green); font-variant-numeric: tabular-nums; }
+		.d4__tabs button[aria-selected="true"] .d4__tnum { color: var(--tm-accent); }
+		.d4__tlabel { flex: 1; }
+		.d4__tcount { flex: 0 0 auto; display: grid; place-items: center; min-width: 28px; height: 28px; padding: 0 8px; border-radius: 999px; background: var(--tm-mint); color: var(--tm-green); font-size: 12px; font-weight: 700; }
+		.d4__tabs button[aria-selected="true"] .d4__tcount { background: rgba(255, 255, 255, .14); color: #fff; }
+		.d4__help { padding: 24px; border-radius: 16px; background: var(--tm-mint); }
+		.d4__help h3 { font-size: 20px; line-height: 1.3; }
+		.d4__help p { margin: 6px 0 20px; font-size: 15px; color: var(--tm-muted); }
+		.d4__panel.is-entering { animation: d4-in .35s var(--tm-ease); }
+		@keyframes d4-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+		.d4__intro { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 24px; margin-bottom: 24px; }
+		.d4__intro h3 { font-size: 28px; line-height: 1.25; }
+		.d4__intro span { display: block; margin-top: 6px; font-size: 14px; font-weight: 600; color: var(--tm-muted); }
+		.d4__list { display: grid; gap: 12px; }
+		.d4 .acc { border: 1px solid var(--tm-line); border-radius: 16px; background: #fff; transition: border-color .2s var(--tm-ease), box-shadow .25s var(--tm-ease); }
+		.d4 .acc:hover { border-color: var(--faq-sign); }
+		.d4 .acc.is-open { border-color: var(--faq-sign); box-shadow: 0 14px 32px -20px rgba(15, 82, 76, .4); }
+		.d4 .acc__q { gap: 16px; min-height: 80px; padding: 20px 24px; font-size: 19px; }
+		.d4 .acc__num { flex: 0 0 36px; display: grid; place-items: center; height: 36px; border-radius: 10px; background: var(--tm-mint); color: var(--tm-green); font-size: 13px; font-weight: 700; }
+		.d4 .acc__qt { flex: 1; }
+		.d4 .acc__sign { width: 40px; height: 40px; background: var(--tm-mint); font-size: 16px; }
+		.d4 .acc.is-open .acc__sign { background: var(--tm-green); color: #fff; }
+		.d4 .acc__body { padding: 0 24px 24px 76px; }
+
+		/* =========================================================
+		   05 · Stacked Topics + Side Column — Design 02 with a contact card
+		   ========================================================= */
+		.d5__grid { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 48px; align-items: start; margin-top: 48px; }
+		.d5__list { display: grid; gap: 16px; }
+		.d5__aside { position: sticky; top: 88px; display: grid; gap: 16px; }
+		.d5__contact { padding: 24px; border-radius: 16px; background: var(--tm-mint); }
+		.d5__contact h3 { font-size: 20px; line-height: 1.3; }
+		.d5__contact > p { margin: 6px 0 16px; font-size: 15px; line-height: 1.5; color: var(--tm-muted); }
+		.d5__lines { display: grid; gap: 10px; margin: 0 0 20px; padding: 0; list-style: none; font-size: 15px; line-height: 1.45; }
+		.d5__lines li { display: flex; gap: 12px; align-items: flex-start; }
+		.d5__lines svg { font-size: 18px; margin-top: 1px; color: var(--tm-green); }
+		.d5__lines a { color: var(--tm-green); font-weight: 600; overflow-wrap: anywhere; }
+		.d5__lines a:hover { text-decoration: underline; }
+		.d5__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+		/* ---------- Responsive (breakpoints follow the live page) ---------- */
+		@media (max-width: 1199.98px) {
+			.d3__grid { grid-template-columns: 320px minmax(0, 1fr); gap: 32px; }
+			.d4__grid { grid-template-columns: 320px minmax(0, 1fr); gap: 40px; }
+			.d5__grid { grid-template-columns: minmax(0, 1fr) 340px; gap: 32px; }
+			.d4__tabs button { font-size: 15px; }
+		}
+		@media (max-width: 991.98px) {
+			.container { --gutter: 24px; }
+			.tm-section { padding-block: 56px 72px; }
+			.xbar__brand small { display: none; }
+			.demo__specs > div { grid-template-columns: 1fr; }
+			.demos { gap: 32px; padding: 24px 12px 40px; }
+			.demo { border-radius: 16px; }
+
+
+			.d1__tabs { gap: 8px; margin-block: 32px; }
+			.d1__tabs button { min-height: 44px; padding: 10px 16px; font-size: 14px; }
+
+			.d3__grid { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+			.d3__panel { display: contents; }
+			.d3__tabs { display: flex; gap: 8px; order: 0; overflow-x: auto; scrollbar-width: none; margin-inline: calc(-1 * var(--gutter)); padding-inline: var(--gutter); }
+			.d3__tabs button { flex: 0 0 auto; width: auto; min-height: 44px; padding: 10px 16px; border-radius: 999px; background: var(--tm-mint); font-size: 14px; white-space: nowrap; }
+			.d3__tabs button[aria-selected="true"] { background: var(--tm-green); color: #fff; }
+			.d3__tabs button[aria-selected="true"] svg { color: var(--tm-accent); }
+			.d3__list { order: 1; }
+			.d3__cta { order: 2; }
+
+
+			.d4__grid { display: flex; flex-direction: column; align-items: stretch; gap: 24px; margin-top: 32px; }
+			.d4__nav { display: contents; }
+			.d4__tabs { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; order: 0; min-width: 0; margin-inline: calc(-1 * var(--gutter)); padding-inline: var(--gutter); }
+			.d4__tabs button { flex: 0 0 auto; width: auto; min-height: 44px; padding: 8px 10px 8px 16px; border-radius: 999px; background: var(--faq-pill); white-space: nowrap; font-size: 14px; }
+			.d4__tnum { display: none; }
+			.d4__tcount { min-width: 24px; height: 24px; }
+			.d4__panel { order: 1; }
+			.d4__help { order: 2; }
+
+			.d5__grid { grid-template-columns: minmax(0, 1fr); gap: 24px; margin-top: 32px; }
+			.d5__aside { position: static; }
+		}
+		@media (max-width: 767.98px) {
+			.container { --gutter: 16px; }
+			.xbar__in { gap: 12px; }
+			.demos { padding-inline: 8px; }
+			.demo__top { padding-block: 22px; }
+			.demo__name { font-size: 22px; }
+			.d1__tabs { flex-wrap: nowrap; justify-content: flex-start; max-width: none; overflow-x: auto; scrollbar-width: none; margin: 28px calc(-1 * var(--gutter)); padding-inline: var(--gutter); }
+			.d1__tabs button { flex: 0 0 auto; white-space: nowrap; }
+			.d1 .acc__q { gap: 12px; min-height: 80px; padding: 20px; font-size: 19px; }
+			.d1 .acc__sign { width: 36px; height: 36px; }
+			.d1 .acc__body { padding: 0 20px 20px; }
+			:is(.d2, .d5) .cacc__head { flex-wrap: wrap; padding: 0 16px 16px; }
+			:is(.d2, .d5) .cacc__toggle { padding: 20px 0 4px; min-height: 0; gap: 14px; flex-basis: 100%; }
+			:is(.d2, .d5) .cacc__label { font-size: 17px; }
+			:is(.d2, .d5) .cacc__body { padding: 0 16px 8px; }
+			:is(.d2, .d5) .cacc__head .btn { margin-left: 62px; }
+			.d3 .acc__q { padding: 20px 16px; font-size: 19px; gap: 12px; }
+			.d3 .acc__num { min-width: 24px; padding-top: 3px; }
+			.d3 .acc__body { padding: 0 16px 20px 52px; }
+			.d4__intro h3 { font-size: 22px; }
+			.d4 .acc__q { gap: 12px; min-height: 72px; padding: 16px; font-size: 17px; }
+			.d4 .acc__num { flex-basis: 30px; height: 30px; font-size: 12px; }
+			.d4 .acc__sign { width: 34px; height: 34px; }
+			.d4 .acc__body { padding: 0 16px 20px; font-size: 15px; }
+		}
+		@media (prefers-reduced-motion: reduce) {
+			*, *::before, *::after { transition: none !important; }
+			html { scroll-behavior: auto; }
+		}
+	</style>
+</head>
+<body>
+
+	<header class="xbar">
+		<div class="container xbar__in">
+			<p class="xbar__brand">Tunamaya FAQ <small>5 accordion designs</small></p>
+			<nav class="xbar__nav" aria-label="Designs">
+				<a href="#design-1">01 Centred Column</a>
+				<a href="#design-2">02 Stacked Topics</a>
+				<a href="#design-3">03 Mint Panel</a>
+				<a href="#design-4">04 Side Tabs</a>
+				<a href="#design-5">05 Contact Card</a>
+			</nav>
+		</div>
+	</header>
+
+	<main class="demos">
+		<article class="demo" id="design-1" aria-labelledby="design-1-name">
+			<header class="demo__top">
+				<div class="container demo__bar">
+					<div class="demo__meta">
+						<span class="demo__num">Design 01 <small>of 05</small></span>
+						<h2 class="demo__name" id="design-1-name">Centred Column</h2>
+						<dl class="demo__specs">
+							<div><dt>Accordion</dt><dd>Category pills sit centred in a row above a single column of questions. Each question is an outlined card; one opens at a time, the open card fills mint and its plus sign turns into a green minus.</dd></div>
+							<div><dt>Enquire Now</dt><dd>Inside the answers. On MICE and Weddings, every opened answer ends with an Enquire Now button, with the phone number beside it.</dd></div>
+						</dl>
+					</div>
+					<span class="demo__tag">Start of design 01</span>
+				</div>
+			</header>
+			<section class="tm-section d1" aria-label="Design 01 – Centred Column"></section>
+			<footer class="demo__bottom">
+				<div class="container demo__bar">
+					<span class="demo__tag">End of design 01 · Centred Column</span>
+					<nav class="demo__links" aria-label="Design 01 navigation">
+						<a href="#design-1">Top of this design <span aria-hidden="true">↑</span></a>
+						<a href="#design-2">Next: Design 02 <span aria-hidden="true">↓</span></a>
+					</nav>
+				</div>
+			</footer>
+		</article>
+
+		<article class="demo" id="design-2" aria-labelledby="design-2-name">
+			<header class="demo__top">
+				<div class="container demo__bar">
+					<div class="demo__meta">
+						<span class="demo__num">Design 02 <small>of 05</small></span>
+						<h2 class="demo__name" id="design-2-name">Stacked Topics</h2>
+						<dl class="demo__specs">
+							<div><dt>Accordion</dt><dd>Two levels, no tabs. Each category is a bordered row with an icon and question count; opening it reveals its questions underneath. One category and one question open at a time, with thin lines between questions.</dd></div>
+							<div><dt>Enquire Now</dt><dd>On the category row. MICE and Weddings show Enquire Now on the right of their row, so it is visible even before the category is opened. On phones it drops below the category name.</dd></div>
+						</dl>
+					</div>
+					<span class="demo__tag">Start of design 02</span>
+				</div>
+			</header>
+			<section class="tm-section d2" aria-label="Design 02 – Stacked Topics"></section>
+			<footer class="demo__bottom">
+				<div class="container demo__bar">
+					<span class="demo__tag">End of design 02 · Stacked Topics</span>
+					<nav class="demo__links" aria-label="Design 02 navigation">
+						<a href="#design-2">Top of this design <span aria-hidden="true">↑</span></a>
+						<a href="#design-3">Next: Design 03 <span aria-hidden="true">↓</span></a>
+					</nav>
+				</div>
+			</footer>
+		</article>
+
+		<article class="demo" id="design-3" aria-labelledby="design-3-name">
+			<header class="demo__top">
+				<div class="container demo__bar">
+					<div class="demo__meta">
+						<span class="demo__num">Design 03 <small>of 05</small></span>
+						<h2 class="demo__name" id="design-3-name">Mint Panel</h2>
+						<dl class="demo__specs">
+							<div><dt>Accordion</dt><dd>Categories are listed in a sticky mint panel on the left; choosing one shows its questions on the right. Questions are numbered 01, 02…, one opens at a time and the open question gets a mint background.</dd></div>
+							<div><dt>Enquire Now</dt><dd>In the green card under the category list. When MICE or Weddings is selected, the card changes to an enquiry message with Enquire Now; for the other categories it shows Contact Us.</dd></div>
+						</dl>
+					</div>
+					<span class="demo__tag">Start of design 03</span>
+				</div>
+			</header>
+			<section class="tm-section d3" aria-label="Design 03 – Mint Panel"></section>
+			<footer class="demo__bottom">
+				<div class="container demo__bar">
+					<span class="demo__tag">End of design 03 · Mint Panel</span>
+					<nav class="demo__links" aria-label="Design 03 navigation">
+						<a href="#design-3">Top of this design <span aria-hidden="true">↑</span></a>
+						<a href="#design-4">Next: Design 04 <span aria-hidden="true">↓</span></a>
+					</nav>
+				</div>
+			</footer>
+		</article>
+
+		<article class="demo" id="design-4" aria-labelledby="design-4-name">
+			<header class="demo__top">
+				<div class="container demo__bar">
+					<div class="demo__meta">
+						<span class="demo__num">Design 04 <small>of 05</small></span>
+						<h2 class="demo__name" id="design-4-name">Side Tabs</h2>
+						<dl class="demo__specs">
+							<div><dt>Accordion</dt><dd>Sticky side tabs show each category’s number and question count; choosing one shows its questions on the right. Questions are numbered white cards with a thin outline; one opens at a time and the open card gets a mint outline and soft shadow.</dd></div>
+							<div><dt>Enquire Now</dt><dd>Beside the category title. On MICE and Weddings, Enquire Now sits to the right of the category title, above the questions.</dd></div>
+						</dl>
+					</div>
+					<span class="demo__tag">Start of design 04</span>
+				</div>
+			</header>
+			<section class="tm-section d4" aria-label="Design 04 – Side Tabs"></section>
+			<footer class="demo__bottom">
+				<div class="container demo__bar">
+					<span class="demo__tag">End of design 04 · Side Tabs</span>
+					<nav class="demo__links" aria-label="Design 04 navigation">
+						<a href="#design-4">Top of this design <span aria-hidden="true">↑</span></a>
+						<a href="#design-5">Next: Design 05 <span aria-hidden="true">↓</span></a>
+					</nav>
+				</div>
+			</footer>
+		</article>
+
+		<article class="demo" id="design-5" aria-labelledby="design-5-name">
+			<header class="demo__top">
+				<div class="container demo__bar">
+					<div class="demo__meta">
+						<span class="demo__num">Design 05 <small>of 05</small></span>
+						<h2 class="demo__name" id="design-5-name">Contact Card</h2>
+						<dl class="demo__specs">
+							<div><dt>Accordion</dt><dd>The same two-level accordion as Design 02: each category row opens to show its questions, one at a time. A sticky contact card on the right shows phone, email and location; on phones it moves below the questions.</dd></div>
+							<div><dt>Enquire Now</dt><dd>In two places. On the MICE and Weddings category rows (as in Design 02), and in the contact card, which switches to an enquiry message with Enquire Now while MICE or Weddings is open.</dd></div>
+						</dl>
+					</div>
+					<span class="demo__tag">Start of design 05</span>
+				</div>
+			</header>
+			<section class="tm-section d5" aria-label="Design 05 – Contact Card"></section>
+			<footer class="demo__bottom">
+				<div class="container demo__bar">
+					<span class="demo__tag">End of design 05 · Contact Card</span>
+					<nav class="demo__links" aria-label="Design 05 navigation">
+						<a href="#design-5">Top of this design <span aria-hidden="true">↑</span></a>
+						<a href="#design-1">Back to Design 01 <span aria-hidden="true">↑</span></a>
+					</nav>
+				</div>
+			</footer>
+		</article>
+
+	</main>
+
+	<script>
+	(() => {
+		const SITE = 'https://tunamaya-tioman.careluxuryhotels.com';
+		const CONTACT = `${SITE}/contact-us`;
+		const PHONE = '<a href="tel:+6094194988">+609 4194 988</a>';
+
+		const svg = (inner) => `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${inner}</svg>`;
+		const PLUS = svg('<path class="v" d="M12 5v14"/><path d="M5 12h14"/>');
+		const CHEVRON = svg('<path d="M6 9l6 6 6-6"/>');
+		const ARROW = svg('<path d="M5 12h14M13 6l6 6-6 6"/>');
+		const PHONE_ICON = svg('<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>');
+		const MAIL_ICON = svg('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>');
+		const PIN_ICON = svg('<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>');
+
+		const ICONS = {
+			bed: svg('<path d="M3 19v-7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v7M3 15h18"/><path d="M6 10V7.5A1.5 1.5 0 0 1 7.5 6h3A1.5 1.5 0 0 1 12 7.5V10"/>'),
+			boat: svg('<path d="M2 19c1.7 1.2 3.3 1.2 5 0s3.3-1.2 5 0 3.3 1.2 5 0 3.3-1.2 5 0"/><path d="M4.5 15.5 3.5 12h17l-1.5 3.5"/><path d="M12 12V3l6 6h-6"/>'),
+			dining: svg('<path d="M7 3v18M4.5 3v5a2.5 2.5 0 0 0 5 0V3"/><path d="M17 21V3c-2 0-3.5 2.5-3.5 6.5 0 2 1.2 3.5 3.5 3.5"/>'),
+			island: svg('<path d="M3 20h18"/><path d="m5 20 5-9 3 5 2-3 4 7"/><circle cx="17" cy="6" r="2"/>'),
+			briefcase: svg('<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8.5 7V5.5A1.5 1.5 0 0 1 10 4h4a1.5 1.5 0 0 1 1.5 1.5V7M3 13h18"/>'),
+			heart: svg('<path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 7.5 2.8C19.5 15.4 12 20 12 20z"/>'),
+		};
+
+		// Content from "TBSR Frequently Asked Questions 2027" (as used on the live page).
+		const CATEGORIES = [
+			{
+				label: 'Reservations & Accommodation',
+				icon: 'bed',
+				items: [
+					{ q: 'Where is Tunamaya Beach & Spa Resort – Tioman Island located?', a: '<p>Tunamaya Beach &amp; Spa Resort is a secluded beachfront retreat located near Kampung Mukut on Tioman Island, Pahang, Malaysia. Surrounded by lush tropical rainforest, majestic mountains, and crystal-clear waters, the resort offers a peaceful escape into nature.</p>' },
+					{ q: 'What types of accommodation are available at the resort?', a: '<p>The resort features seven villa categories, including Garden Family Villa, Rainforest Villa, Rainforest Family Villa, Beach Cluster Villa, Semi Beach Villa, Beach Villa and Beach Family Villa. Each offers a comfortable island retreat with views of the surrounding tropical landscape or coastline.</p>' },
+					{ q: 'What are the check-in and check-out times?', a: '<p>Check-in begins at 2:00 PM, while check-out is by 10:00 AM. Early check-in and late check-out requests are subject to availability.</p>' },
+					{ q: 'Is the resort suitable for families with children?', a: '<p>Yes. Tunamaya welcomes families seeking a relaxing island getaway. Selected family villas accommodate up to three guests, while additional arrangements and children\'s activities may be available upon request.</p>' },
+				],
+			},
+			{
+				label: 'Transportation & Travel Information',
+				icon: 'boat',
+				items: [
+					{ q: 'How do I get to Tunamaya Beach & Spa Resort – Tioman Island?', a: '<p>Guests can take a ferry from Mersing or Tanjung Gemok Jetty to Tioman Island, with a journey of approximately 1.5–2 hours. From the designated arrival jetty, a resort boat transfer takes approximately 20–30 minutes to reach Tunamaya. Advance arrangements are required.</p>' },
+					{ q: 'Does the resort provide boat transfer services?', a: '<p>Yes. Resort boat transfers can be arranged for guests travelling to and from the resort. Advance reservations are required, and all transfers are subject to weather and sea conditions.</p>' },
+					{ q: 'Is the resort open throughout the year?', a: '<p>Tunamaya operates seasonally and typically closes during the monsoon period, generally from November to mid-February. Guests are encouraged to check the latest operating dates before planning their visit.</p>' },
+				],
+			},
+			{
+				label: 'Dining, Wellness & Resort Facilities',
+				icon: 'dining',
+				items: [
+					{ q: 'What dining options are available at the resort?', a: '<p>Guests can enjoy local and international cuisine at Pawana Restaurant, featuring a selection of à la carte dishes and dining experiences. Ombak Bar offers a relaxing setting for refreshing beverages and cocktails.</p>' },
+					{ q: 'Does the resort have a swimming pool and spa?', a: '<p>Yes. Guests can unwind at the resort\'s infinity swimming pool overlooking the sea or enjoy rejuvenating treatments at Sarang Spa, surrounded by the tranquillity of the island\'s natural environment.</p>' },
+					{ q: 'What recreational facilities are available at the resort?', a: '<p>The resort offers a variety of recreational experiences, including an infinity swimming pool, an outdoor Jungle Gym for adults, archery and selected water activities. Facilities and activities are subject to availability.</p>' },
+				],
+			},
+			{
+				label: 'Island Adventures & Outdoor Activities',
+				icon: 'island',
+				items: [
+					{ q: 'What activities can guests enjoy at Tunamaya?', a: '<p>Guests can explore a range of island experiences, including snorkeling, marine discovery, rainforest exploration, water activities, archery and outdoor fitness at the Jungle Gym. Activities are subject to weather conditions and availability.</p>' },
+					{ q: 'Does the resort offer snorkeling trips?', a: '<p>Yes. Snorkeling experiences can be arranged for guests wishing to discover Tioman Island\'s vibrant marine life and underwater scenery. Advance booking is recommended, and trips are subject to suitable weather and sea conditions.</p>' },
+					{ q: 'Are snorkeling and outdoor activities suitable for beginners and children?', a: '<p>Selected activities may be suitable for beginners and families, depending on age, swimming ability and safety requirements. Guests are encouraged to consult the resort team for suitable activities before making arrangements.</p>' },
+				],
+			},
+			{
+				label: 'MICE, Corporate Retreats & Team Building',
+				icon: 'briefcase',
+				enquire: {
+					href: `${SITE}/events`,
+					title: 'Planning a corporate retreat?',
+					text: 'Tell us about your group and our events team will put together a tailored programme.',
+				},
+				items: [
+					{ q: 'Is Tunamaya suitable for corporate retreats and team-building programmes?', a: '<p>Yes. With its secluded beachfront location and lush natural surroundings, Tunamaya offers an inspiring setting for corporate retreats, incentive trips, team-building programmes and company getaways. The island environment encourages collaboration, relaxation and meaningful team connections.</p>' },
+					{ q: 'Can the resort arrange corporate events and team-building activities?', a: '<p>Corporate groups may enquire about customised programmes combining accommodation, dining, outdoor challenges, recreational activities and team bonding experiences. Arrangements are subject to group size, availability and operational requirements.</p>' },
+					{ q: 'Does the resort offer corporate group packages or exclusive resort arrangements?', a: '<p>Corporate groups may contact the resort to discuss tailored arrangements for retreats, incentive trips and private group stays. Exclusive resort arrangements may also be considered, subject to availability and management approval.</p>' },
+				],
+			},
+			{
+				label: 'Weddings, Honeymoons & Special Occasions',
+				icon: 'heart',
+				enquire: {
+					href: `${SITE}/weddings`,
+					title: 'Planning a wedding or celebration?',
+					text: 'Share your date and ideas, and our team will help you plan your island celebration.',
+				},
+				items: [
+					{ q: 'Can I organise a destination wedding at Tunamaya Beach & Spa Resort – Tioman Island?', a: '<p>Tunamaya\'s breathtaking beachfront scenery, tropical rainforest and majestic mountain backdrop create a romantic setting for intimate destination weddings and private celebrations. Couples are welcome to enquire about possible arrangements, subject to availability and resort approval.</p>' },
+					{ q: 'Does the resort offer honeymoon or romantic getaway packages?', a: '<p>Yes. Tunamaya offers romantic getaway experiences for couples seeking a memorable island escape. Guests may enquire about the Tunamaya Timeless Romantic Escape package, featuring selected accommodation and dining experiences, subject to the prevailing package terms.</p>' },
+					{ q: 'Can the resort arrange romantic dinners, anniversaries or special celebrations?', a: '<p>Guests may enquire about romantic dining experiences and personalised arrangements for honeymoons, anniversaries, birthdays and other special occasions. Advance reservations are recommended, and arrangements are subject to availability.</p>' },
+					{
+						q: 'How can I make a reservation or enquire about group events, weddings and special packages?',
+						a: '<p>For accommodation bookings, corporate retreats, team-building programmes, romantic getaways or special event enquiries, please contact our reservations team:</p>' +
+							'<address class="faq-contact">' +
+							'<strong>Tunamaya Beach &amp; Spa Resort – Tioman Island</strong>' +
+							'<span><a href="tel:+6094194988">+609 4194 988</a> / <a href="tel:+6094194188">+609 4194 188</a></span>' +
+							'<a href="mailto:sales.tbsr@careluxuryhotels.com">sales.tbsr@careluxuryhotels.com</a>' +
+							'</address>',
+					},
+				],
+			},
+		];
+
+		const esc = (s) => s.replace(/&/g, '&amp;');
+		const count = (cat) => `${cat.items.length} questions`;
+		const enquireBtn = (cat, cls = 'btn-tm') =>
+			`<a class="btn ${cls}" href="${cat.enquire.href}" target="_blank" rel="noopener">Enquire Now ${ARROW}</a>`;
+		const contactBtn = (cls) => `<a class="btn ${cls}" href="${CONTACT}" target="_blank" rel="noopener">Contact Us</a>`;
+		const heading = (centred) => `
+			<div class="${centred ? 'is-centred' : ''}">
+				<p class="tm-eyebrow">Frequently Asked Questions</p>
+				<h2 class="tm-display">All you need to know about Tunamaya</h2>
+			</div>`;
+
+		// One accordion item. opts: { open, num, sign, after } — `after` is extra HTML at the end of the answer.
+		const accItem = (id, item, opts = {}) => `
+			<div class="acc${opts.open ? ' is-open' : ''}">
+				<button class="acc__q" type="button" id="${id}-q" aria-expanded="${opts.open ? 'true' : 'false'}" aria-controls="${id}-a">
+					${opts.num ? `<span class="acc__num">${String(opts.num).padStart(2, '0')}</span>` : ''}
+					<span class="acc__qt">${esc(item.q)}</span>
+					<span class="acc__sign">${opts.sign || PLUS}</span>
+				</button>
+				<div class="acc__a" id="${id}-a" role="region" aria-labelledby="${id}-q">
+					<div><div class="acc__body">${item.a}${opts.after || ''}</div></div>
+				</div>
+			</div>`;
+
+		const tabs = (d, cls, withIcon) => `
+			<div class="${cls}" role="tablist" aria-label="Question categories">
+				${CATEGORIES.map((cat, i) => `
+					<button type="button" role="tab" id="${d}-tab-${i}" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}" data-cat="${i}">
+						${withIcon ? ICONS[cat.icon] : ''}<span>${esc(cat.label)}</span>
+					</button>`).join('')}
+			</div>`;
+
+		// Each design: shell() builds the static frame; panel(ci) fills [data-panel]; aside(ci) optionally fills [data-aside].
+		const DESIGNS = {
+			'design-1': {
+				shell: () => `
+					<div class="container">
+						${heading(true)}
+						${tabs('d1', 'd1__tabs')}
+						<div class="d1__list" role="tabpanel" data-panel></div>
+						<div class="d1__help">
+							<p><strong>Still have questions?</strong> Speak with our operations team and get direct answers.</p>
+							${contactBtn('btn-tm-outline')}
+						</div>
+					</div>`,
+				panel: (ci) => {
+					const cat = CATEGORIES[ci];
+					const after = cat.enquire ? `
+						<div class="enq-inline">
+							${enquireBtn(cat)}
+							<span class="enq-inline__note">or call ${PHONE}</span>
+						</div>` : '';
+					return cat.items.map((it, i) => accItem(`d1-${ci}-${i}`, it, { open: i === 0, after })).join('');
+				},
+			},
+
+			'design-2': {
+				shell: () => `
+					<div class="container">
+						${heading(true)}
+						<div class="d2__list">
+							${CATEGORIES.map((cat, ci) => `
+								<div class="cacc${ci === 0 ? ' is-open' : ''}">
+									<div class="cacc__head">
+										<button class="cacc__toggle" type="button" id="d2-c${ci}" aria-expanded="${ci === 0}" aria-controls="d2-c${ci}-p">
+											<span class="cacc__icon">${ICONS[cat.icon]}</span>
+											<span class="cacc__label">${esc(cat.label)}<small>${count(cat)}</small></span>
+											<span class="cacc__chev">${CHEVRON}</span>
+										</button>
+										${cat.enquire ? enquireBtn(cat) : ''}
+									</div>
+									<div class="acc__a" id="d2-c${ci}-p" role="region" aria-labelledby="d2-c${ci}">
+										<div><div class="cacc__body">
+											${cat.items.map((it, i) => accItem(`d2-${ci}-${i}`, it)).join('')}
+										</div></div>
+									</div>
+								</div>`).join('')}
+						</div>
+						<p class="d2__help">Still have questions? <a href="${CONTACT}" target="_blank" rel="noopener">Speak with our operations team</a></p>
+					</div>`,
+			},
+
+			'design-5': {
+				shell: () => `
+					<div class="container">
+						${heading(false)}
+						<div class="d5__grid">
+							<div class="d5__list">
+								${CATEGORIES.map((cat, ci) => `
+									<div class="cacc${ci === 0 ? ' is-open' : ''}" data-ci="${ci}">
+										<div class="cacc__head">
+											<button class="cacc__toggle" type="button" id="d5-c${ci}" aria-expanded="${ci === 0}" aria-controls="d5-c${ci}-p">
+												<span class="cacc__icon">${ICONS[cat.icon]}</span>
+												<span class="cacc__label">${esc(cat.label)}<small>${count(cat)}</small></span>
+												<span class="cacc__chev">${CHEVRON}</span>
+											</button>
+											${cat.enquire ? enquireBtn(cat) : ''}
+										</div>
+										<div class="acc__a" id="d5-c${ci}-p" role="region" aria-labelledby="d5-c${ci}">
+											<div><div class="cacc__body">
+												${cat.items.map((it, i) => accItem(`d5-${ci}-${i}`, it)).join('')}
+											</div></div>
+										</div>
+									</div>`).join('')}
+							</div>
+							<aside class="d5__aside" aria-label="Contact details">
+								<div class="d5__contact" data-contact></div>
+							</aside>
+						</div>
+					</div>`,
+				// Card copy follows the open topic; MICE and Weddings swap in their enquiry message.
+				contact: (cat) => {
+					const enq = cat && cat.enquire;
+					return `
+						<h3>${enq ? enq.title : 'Talk to our team'}</h3>
+						<p>${enq ? enq.text : 'Our operations team can help with bookings, transfers and anything not covered here.'}</p>
+						<ul class="d5__lines">
+							<li>${PHONE_ICON}<span><a href="tel:+6094194988">+609 4194 988</a> / <a href="tel:+6094194188">+609 4194 188</a></span></li>
+							<li>${MAIL_ICON}<a href="mailto:sales.tbsr@careluxuryhotels.com">sales.tbsr@careluxuryhotels.com</a></li>
+							<li>${PIN_ICON}<span>Kampung Mukut, Tioman Island, Pahang, Malaysia</span></li>
+						</ul>
+						<div class="d5__actions">${enq ? enquireBtn(cat) : contactBtn('btn-tm')}</div>`;
+				},
+				init(root) {
+					const card = root.querySelector('[data-contact]');
+					const show = (ci) => { card.innerHTML = this.contact(CATEGORIES[ci]); };
+					show(0);
+					root.addEventListener('cacc:toggle', () => {
+						const open = root.querySelector('.cacc.is-open');
+						show(open ? Number(open.dataset.ci) : null);
+					});
+				},
+			},
+
+			'design-3': {
+				shell: () => `
+					<div class="container">
+						${heading(false)}
+						<div class="d3__grid">
+							<div class="d3__panel">
+								${tabs('d3', 'd3__tabs', true)}
+								<div class="d3__cta" data-aside></div>
+							</div>
+							<div class="d3__list" role="tabpanel" data-panel></div>
+						</div>
+					</div>`,
+				panel: (ci) => CATEGORIES[ci].items
+					.map((it, i) => accItem(`d3-${ci}-${i}`, it, { open: i === 0, num: i + 1 })).join(''),
+				aside: (ci) => {
+					const cat = CATEGORIES[ci];
+					return cat.enquire
+						? `<h3>${cat.enquire.title}</h3><p>${cat.enquire.text}</p>${enquireBtn(cat, 'btn-tm-light')}`
+						: `<h3>Still have questions?</h3><p>Speak with our operations team and get direct answers.</p>${contactBtn('btn-tm-light')}`;
+				},
+			},
+
+			'design-4': {
+				shell: () => `
+					<div class="container">
+						${heading(false)}
+						<div class="d4__grid">
+							<div class="d4__nav">
+								<div class="d4__tabs" role="tablist" aria-label="Question categories">
+									${CATEGORIES.map((cat, i) => `
+										<button type="button" role="tab" id="d4-tab-${i}" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}">
+											<span class="d4__tnum">${String(i + 1).padStart(2, '0')}</span>
+											<span class="d4__tlabel">${esc(cat.label)}</span>
+											<span class="d4__tcount">${cat.items.length}</span>
+										</button>`).join('')}
+								</div>
+								<aside class="d4__help">
+									<h3>Still have questions?</h3>
+									<p>Speak with our operations team and get direct answers.</p>
+									${contactBtn('btn-tm')}
+								</aside>
+							</div>
+							<div class="d4__panel" role="tabpanel" data-panel></div>
+						</div>
+					</div>`,
+				panel: (ci) => {
+					const cat = CATEGORIES[ci];
+					return `
+						<div class="d4__intro">
+							<div><h3>${esc(cat.label)}</h3><span>${count(cat)}</span></div>
+							${cat.enquire ? enquireBtn(cat) : ''}
+						</div>
+						<div class="d4__list">
+							${cat.items.map((it, i) => accItem(`d4-${ci}-${i}`, it, { open: i === 0, num: i + 1 })).join('')}
+						</div>`;
+				},
+			},
+		};
+
+		Object.entries(DESIGNS).forEach(([id, design]) => {
+			const root = document.querySelector(`#${id} > .tm-section`);
+			root.innerHTML = design.shell();
+			const panel = root.querySelector('[data-panel]');
+			const aside = root.querySelector('[data-aside]');
+			const tabBtns = [...root.querySelectorAll('[role="tab"]')];
+
+			const select = (ci, focus) => {
+				tabBtns.forEach((b, i) => {
+					const on = i === ci;
+					b.setAttribute('aria-selected', on);
+					b.tabIndex = on ? 0 : -1;
+				});
+				panel.setAttribute('aria-labelledby', tabBtns[ci].id);
+				panel.innerHTML = design.panel(ci);
+				if (aside) aside.innerHTML = design.aside(ci);
+				if (panel.classList.contains('d4__panel')) {
+					panel.classList.remove('is-entering');
+					void panel.offsetWidth;
+					panel.classList.add('is-entering');
+				}
+				if (focus) tabBtns[ci].focus();
+				const row = tabBtns[ci].parentElement;
+				if (row.scrollWidth > row.clientWidth) {
+					row.scrollTo({ left: tabBtns[ci].offsetLeft - row.offsetLeft - (row.clientWidth - tabBtns[ci].offsetWidth) / 2, behavior: 'smooth' });
+				}
+			};
+
+			tabBtns.forEach((b, i) => {
+				b.addEventListener('click', () => select(i));
+				b.addEventListener('keydown', (e) => {
+					const last = tabBtns.length - 1;
+					const next = { ArrowRight: i + 1, ArrowDown: i + 1, ArrowLeft: i - 1, ArrowUp: i - 1, Home: 0, End: last }[e.key];
+					if (next === undefined) return;
+					e.preventDefault();
+					select(next > last ? 0 : next < 0 ? last : next, true);
+				});
+			});
+			if (tabBtns.length) select(0);
+			if (design.init) design.init(root);
+		});
+
+		// Accordions: one open at a time within each list.
+		document.addEventListener('click', (e) => {
+			const btn = e.target.closest('.acc__q, .cacc__toggle');
+			if (!btn) return;
+			const item = btn.closest(btn.classList.contains('acc__q') ? '.acc' : '.cacc');
+			const willOpen = !item.classList.contains('is-open');
+			[...item.parentElement.children].forEach((sib) => {
+				if (sib === item || !sib.classList.contains('is-open')) return;
+				sib.classList.remove('is-open');
+				sib.querySelector('[aria-expanded]').setAttribute('aria-expanded', 'false');
+			});
+			item.classList.toggle('is-open', willOpen);
+			btn.setAttribute('aria-expanded', willOpen);
+			if (item.classList.contains('cacc')) item.dispatchEvent(new CustomEvent('cacc:toggle', { bubbles: true }));
+		});
+	})();
+	</script>
+</body>
+</html>
